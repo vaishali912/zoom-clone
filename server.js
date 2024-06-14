@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 
 app.use('/peerjs', peerServer);
 
-app.set('view engine', 'pug')
+app.set('view engine', 'ejs')
 app.use(express.static('static'))
 
 app.get('/:room', (req, res) => {
@@ -25,17 +25,20 @@ app.get('/:room', (req, res) => {
 io.on('connection', socket => {
   socket.on('join-room', (roomId, userId) => {
     socket.join(roomId)
-    socket.to(roomId).broadcast.emit('user-connected', userId);
-    // messages
+    socket.broadcast.to(roomId).emit('user-disconnected', userId)
+    
     socket.on('message', (message) => {
-      //send message to the same room
+      
       io.to(roomId).emit('createMessage', message)
   }); 
 
     socket.on('disconnect', () => {
-      socket.to(roomId).broadcast.emit('user-disconnected', userId)
+      socket.broadcast.to(roomId).emit('user-disconnected', userId)
     })
   })
 })
+PORT =process.env.PORT|| 80;
 
-server.listen(process.env.PORT||3030)
+server.listen(PORT,()=>{
+  console.log("server is listebibg");
+})
